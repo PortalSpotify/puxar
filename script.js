@@ -79,8 +79,9 @@ async function handleSearch(e) {
         apiResponseSpan.textContent = JSON.stringify(data, null, 2).substring(0, 500) + '...'; // Limita o tamanho do log
 
         // Processar resultados
-        if (data.data && data.data.length > 0) {
-            displayResults(data.data);
+        // A API CNPJjá retorna o array de resultados na chave 'records'
+        if (data.records && data.records.length > 0) {
+            displayResults(data.records);
         } else {
             showNoResults();
         }
