@@ -106,7 +106,10 @@ function displayResults(results) {
         // Extrair dados
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
-        let email = 'N/A';      if (typeof emailData === 'string') {
+        let email = 'N/A';
+        const emailData = empresa.company?.email || empresa.emails?.[0] || empresa.email;
+
+        if (typeof emailData === 'string') {
             email = emailData;
         } else if (emailData && typeof emailData === 'object' && emailData.address) {
             // Se for um objeto com a chave 'address' (hipótese comum para APIs)
