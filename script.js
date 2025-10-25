@@ -106,7 +106,25 @@ function displayResults(results) {
         // Extrair dados
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
-        const email = empresa.company?.email || empresa.emails?.[0] || empresa.email || 'N/A';
+        let email = 'N/A';      if (typeof emailData === 'string') {
+            email = emailData;
+        } else if (emailData && typeof emailData === 'object' && emailData.address) {
+            // Se for um objeto com a chave 'address' (hipótese comum para APIs)
+            email = emailData.address;
+        } else if (emailData && typeof emailData === 'object' && emailData.value) {
+            // Se for um objeto com a chave 'value'
+            email = emailData.value;
+        } else if (Array.isArray(empresa.emails) && empresa.emails.length > 0) {
+            // Caso a primeira tentativa falhe, tenta extrair de um array de objetos
+            const firstEmail = empresa.emails[0];
+            if (typeof firstEmail === 'string') {
+                email = firstEmail;
+            } else if (firstEmail.address) {
+                email = firstEmail.address;
+            } else if (firstEmail.value) {
+                email = firstEmail.value;
+            }
+        }
         const dataAbertura = formatarData(empresa.founded);
         const status = empresa.status?.text || 'N/A';
         const statusClass = status === 'Ativa' ? 'status-active' : 'status-inactive';
