@@ -52,7 +52,7 @@ async function handleSearch(e) {
         const params = new URLSearchParams({
             'founded.gte': dataInicioISO,
             'founded.lte': dataFimISO,
-            'company.simei.optant.eq': 'true',
+            'company.simei.optant.eq': 'true', // Filtro MEI reativado
             'limit': '5'
         });
 
