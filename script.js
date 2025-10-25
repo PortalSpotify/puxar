@@ -106,7 +106,7 @@ function displayResults(results) {
         // Extrair dados
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
-        const email = empresa.company?.email || empresa.email || 'N/A';
+        const email = empresa.company?.email || empresa.emails?.[0] || empresa.email || 'N/A';
         const dataAbertura = formatarData(empresa.founded);
         const status = empresa.status?.text || 'N/A';
         const statusClass = status === 'Ativa' ? 'status-active' : 'status-inactive';
