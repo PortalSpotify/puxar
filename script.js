@@ -94,11 +94,45 @@ async function handleSearch(e) {
     }
 }
 
+// Função auxiliar para buscar detalhes do CNPJ (incluindo email)
+async function fetchEmailDetails(cnpj) {
+    const url = `${API_BASE_URL.replace('/office', '/office/')}${cnpj}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            // Se a consulta detalhada falhar (ex: CNPJ não encontrado ou erro de permissão), retorna N/A
+            return 'N/A';
+        }
+
+        const data = await response.json();
+        
+        // Tenta extrair o email dos campos mais prováveis na consulta detalhada
+        const email = data.email || data.company?.email || data.contact?.email || 'N/A';
+        return email;
+
+    } catch (error) {
+        console.error('Erro ao buscar detalhes do CNPJ:', cnpj, error);
+        return 'N/A';
+    }
+}
+
 // Função para exibir resultados
-function displayResults(results) {
+async async function displayResults(results) {
     // Limpar tabela
     tableBody.innerHTML = '';
-
+    
+    // Preparar para buscar emails em paralelo
+    const emailPromises = results.map(empresa => fetchEmailDetails(empresa.taxId));
+    const emails = await Promise.all(emailPromises);
+    
     // Adicionar linhas à tabela
     results.forEach((empresa, index) => {
         const row = document.createElement('tr');
@@ -106,8 +140,7 @@ function displayResults(results) {
         // Extrair dados
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
-        // CORREÇÃO: Tentando extrair o email dos campos mais prováveis (empresa.email, empresa.company.email, empresa.contact.email)
-        const email = empresa.email || empresa.company?.email || empresa.contact?.email || 'N/A';
+        const email = emails[index]; // Usa o email obtido na consulta detalhada
         const dataAbertura = formatarData(empresa.founded);
         const status = empresa.status?.text || 'N/A';
         const statusClass = status === 'Ativa' ? 'status-active' : 'status-inactive';
@@ -124,13 +157,16 @@ function displayResults(results) {
     });
 
     // Atualizar contagem de resultados
-    resultCount.textContent = `${results.length} empresa(s) encontrada(s)`;
+    resultCount.textContent = `${results.length} empresa(s) encontrada(s). Nota: ${results.length} créditos adicionais consumidos para buscar emails.`;
 
     // Mostrar container de resultados
     resultsContainer.classList.remove('hidden');
     noResults.classList.add('hidden');
     debugInfo.classList.add('hidden'); // Oculta a seção de debug após o sucesso
 }
+
+// ... (restante do código)
+
 
 // Função para exibir mensagem de nenhum resultado
 function showNoResults() {
