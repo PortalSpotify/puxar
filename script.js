@@ -3,7 +3,7 @@ const API_BASE_URL = 'https://api.cnpja.com/office';
 const API_KEY = 'e3eba6c7-ceee-42b8-99b9-2565102a6bc3-44d3856b-603a-4d0c-9a28-a57dbfd43724';
 
 // Elementos do DOM
-const searchForm = document.getElementById('searchForm');
+const searchForm = document.getElementById('searchForm' );
 const dataInicio = document.getElementById('dataInicio');
 const dataFim = document.getElementById('dataFim');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -79,9 +79,9 @@ async function handleSearch(e) {
         apiResponseSpan.textContent = JSON.stringify(data, null, 2).substring(0, 500) + '...'; // Limita o tamanho do log
 
         // Processar resultados
-        // A API CNPJjá retorna o array de resultados na chave 'records'
+        // CORREÇÃO: A API CNPJjá retorna o array de resultados na chave 'records'
         if (data.records && data.records.length > 0) {
-            displayResults(data.records);
+            displayResults(data.records); // Usando data.records
         } else {
             showNoResults();
         }
@@ -128,18 +128,21 @@ function displayResults(results) {
     // Mostrar container de resultados
     resultsContainer.classList.remove('hidden');
     noResults.classList.add('hidden');
+    debugInfo.classList.add('hidden'); // Oculta a seção de debug após o sucesso
 }
 
 // Função para exibir mensagem de nenhum resultado
 function showNoResults() {
     resultsContainer.classList.add('hidden');
     noResults.classList.remove('hidden');
+    debugInfo.classList.add('hidden');
 }
 
 // Função para exibir erro
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
+    debugInfo.classList.add('hidden');
 }
 
 // Função para limpar resultados
@@ -179,7 +182,7 @@ function formatarData(data) {
     }
 }
 
-// Definir data padrão (últimos 30 dias)
+// Definir data padrão (últimos 6 meses)
 function setDefaultDates() {
     const hoje = new Date();
     // Define o período padrão para os últimos 6 meses (aprox. 180 dias)
@@ -191,4 +194,3 @@ function setDefaultDates() {
 
 // Inicializar com datas padrão
 setDefaultDates();
-
