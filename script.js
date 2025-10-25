@@ -8,6 +8,9 @@ const dataInicio = document.getElementById('dataInicio');
 const dataFim = document.getElementById('dataFim');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const errorMessage = document.getElementById('errorMessage');
+const debugInfo = document.getElementById('debugInfo');
+const requestUrlSpan = document.getElementById('requestUrl');
+const apiResponseSpan = document.getElementById('apiResponse');
 const resultsContainer = document.getElementById('resultsContainer');
 const noResults = document.getElementById('noResults');
 const tableBody = document.getElementById('tableBody');
@@ -32,6 +35,9 @@ async function handleSearch(e) {
 
     // Limpar resultados anteriores
     clearResults();
+    
+    // Ocultar debug
+    debugInfo.classList.add('hidden');
 
     // Mostrar spinner de carregamento
     showLoading(true);
@@ -51,6 +57,8 @@ async function handleSearch(e) {
         });
 
         const url = `${API_BASE_URL}?${params.toString()}`;
+        requestUrlSpan.textContent = url;
+        debugInfo.classList.remove('hidden');
 
         // Fazer requisição à API
         const response = await fetch(url, {
@@ -62,10 +70,13 @@ async function handleSearch(e) {
         });
 
         if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+            const errorText = await response.text();
+            apiResponseSpan.textContent = `Status: ${response.status}. Resposta: ${errorText}`;
+            throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes no console e na seção de debug.`);
         }
 
         const data = await response.json();
+        apiResponseSpan.textContent = JSON.stringify(data, null, 2).substring(0, 500) + '...'; // Limita o tamanho do log
 
         // Processar resultados
         if (data.data && data.data.length > 0) {
@@ -136,6 +147,7 @@ function clearResults() {
     errorMessage.classList.add('hidden');
     resultsContainer.classList.add('hidden');
     noResults.classList.add('hidden');
+    debugInfo.classList.add('hidden');
 }
 
 // Função para mostrar/ocultar spinner
@@ -169,10 +181,11 @@ function formatarData(data) {
 // Definir data padrão (últimos 30 dias)
 function setDefaultDates() {
     const hoje = new Date();
-    const trinta = new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000);
+    // Define o período padrão para os últimos 6 meses (aprox. 180 dias)
+    const seisMeses = new Date(hoje.getTime() - 180 * 24 * 60 * 60 * 1000);
 
     dataFim.value = hoje.toISOString().split('T')[0];
-    dataInicio.value = trinta.toISOString().split('T')[0];
+    dataInicio.value = seisMeses.toISOString().split('T')[0];
 }
 
 // Inicializar com datas padrão
