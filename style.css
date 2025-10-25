@@ -347,3 +347,28 @@ footer {
     }
 }
 
+
+
+/* Estilos para Debug */
+.debug-info {
+    background-color: #fffbe6; /* Amarelo claro para destaque */
+    border: 1px solid #fde68a;
+    color: #92400e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.debug-info h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #b45309;
+}
+
+.debug-info strong {
+    font-weight: 700;
+}
+
