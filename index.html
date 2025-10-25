@@ -31,13 +31,18 @@
                 </form>
             </section>
 
-            <section class="results-section">
+            <section class="results-section" id="resultsSection">
                 <div id="loadingSpinner" class="loading-spinner hidden">
                     <div class="spinner"></div>
                     <p>Carregando dados...</p>
                 </div>
 
                 <div id="errorMessage" class="error-message hidden"></div>
+                <div id="debugInfo" class="debug-info hidden">
+                    <h3>Informações de Debug (Apenas para Diagnóstico)</h3>
+                    <p><strong>URL da Requisição:</strong> <span id="requestUrl"></span></p>
+                    <p><strong>Resposta da API:</strong> <span id="apiResponse"></span></p>
+                </div>
 
                 <div id="resultsContainer" class="results-container hidden">
                     <h2>Resultados da Busca</h2>
