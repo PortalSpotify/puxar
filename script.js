@@ -3,7 +3,7 @@ const API_BASE_URL = 'https://api.cnpja.com/office';
 const API_KEY = 'e3eba6c7-ceee-42b8-99b9-2565102a6bc3-44d3856b-603a-4d0c-9a28-a57dbfd43724';
 
 // Elementos do DOM
-const searchForm = document.getElementById('searchForm' );
+const searchForm = document.getElementById('searchForm');
 const dataInicio = document.getElementById('dataInicio');
 const dataFim = document.getElementById('dataFim');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -79,9 +79,9 @@ async function handleSearch(e) {
         apiResponseSpan.textContent = JSON.stringify(data, null, 2).substring(0, 500) + '...'; // Limita o tamanho do log
 
         // Processar resultados
-        // A API CNPJá retorna o array de resultados na chave 'records'
+        // A API CNPJjá retorna o array de resultados na chave 'records'
         if (data.records && data.records.length > 0) {
-            displayResults(data.records); // Chama a função que fará a busca detalhada do email
+            displayResults(data.records);
         } else {
             showNoResults();
         }
@@ -96,7 +96,6 @@ async function handleSearch(e) {
 
 // Função auxiliar para buscar detalhes do CNPJ (incluindo email)
 async function fetchEmailDetails(cnpj) {
-    // Usa o endpoint de consulta direta, que tem maior chance de retornar o email
     const url = `${API_BASE_URL.replace('/office', '/office/')}${cnpj}`;
 
     try {
@@ -109,7 +108,7 @@ async function fetchEmailDetails(cnpj) {
         });
 
         if (!response.ok) {
-            // Se a consulta detalhada falhar, retorna N/A
+            // Se a consulta detalhada falhar (ex: CNPJ não encontrado ou erro de permissão), retorna N/A
             return 'N/A';
         }
 
@@ -126,11 +125,11 @@ async function fetchEmailDetails(cnpj) {
 }
 
 // Função para exibir resultados
-async function displayResults(results) {
+async async function displayResults(results) {
     // Limpar tabela
     tableBody.innerHTML = '';
     
-    // Preparar para buscar emails em paralelo (um crédito por CNPJ)
+    // Preparar para buscar emails em paralelo
     const emailPromises = results.map(empresa => fetchEmailDetails(empresa.taxId));
     const emails = await Promise.all(emailPromises);
     
@@ -166,18 +165,19 @@ async function displayResults(results) {
     debugInfo.classList.add('hidden'); // Oculta a seção de debug após o sucesso
 }
 
+// ... (restante do código)
+
+
 // Função para exibir mensagem de nenhum resultado
 function showNoResults() {
     resultsContainer.classList.add('hidden');
     noResults.classList.remove('hidden');
-    debugInfo.classList.add('hidden');
 }
 
 // Função para exibir erro
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
-    debugInfo.classList.add('hidden');
 }
 
 // Função para limpar resultados
@@ -217,7 +217,7 @@ function formatarData(data) {
     }
 }
 
-// Definir data padrão (últimos 6 meses)
+// Definir data padrão (últimos 30 dias)
 function setDefaultDates() {
     const hoje = new Date();
     // Define o período padrão para os últimos 6 meses (aprox. 180 dias)
@@ -229,3 +229,4 @@ function setDefaultDates() {
 
 // Inicializar com datas padrão
 setDefaultDates();
+
