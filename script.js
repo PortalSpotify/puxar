@@ -3,7 +3,7 @@ const API_BASE_URL = 'https://api.cnpja.com/office';
 const API_KEY = 'e3eba6c7-ceee-42b8-99b9-2565102a6bc3-44d3856b-603a-4d0c-9a28-a57dbfd43724';
 
 // Elementos do DOM
-const searchForm = document.getElementById('searchForm' );
+const searchForm = document.getElementById('searchForm');
 const dataInicio = document.getElementById('dataInicio');
 const dataFim = document.getElementById('dataFim');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -79,9 +79,9 @@ async function handleSearch(e) {
         apiResponseSpan.textContent = JSON.stringify(data, null, 2).substring(0, 500) + '...'; // Limita o tamanho do log
 
         // Processar resultados
-        // CORREÇÃO: A API CNPJjá retorna o array de resultados na chave 'records'
+        // A API CNPJjá retorna o array de resultados na chave 'records'
         if (data.records && data.records.length > 0) {
-            displayResults(data.records); // Usando data.records
+            displayResults(data.records);
         } else {
             showNoResults();
         }
@@ -106,7 +106,8 @@ function displayResults(results) {
         // Extrair dados
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
-        const email = empresa.company?.email || empresa.email || 'N/A';
+        // CORREÇÃO: Tentando extrair o email dos campos mais prováveis (empresa.email, empresa.company.email, empresa.contact.email)
+        const email = empresa.email || empresa.company?.email || empresa.contact?.email || 'N/A';
         const dataAbertura = formatarData(empresa.founded);
         const status = empresa.status?.text || 'N/A';
         const statusClass = status === 'Ativa' ? 'status-active' : 'status-inactive';
@@ -135,14 +136,12 @@ function displayResults(results) {
 function showNoResults() {
     resultsContainer.classList.add('hidden');
     noResults.classList.remove('hidden');
-    debugInfo.classList.add('hidden');
 }
 
 // Função para exibir erro
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
-    debugInfo.classList.add('hidden');
 }
 
 // Função para limpar resultados
@@ -182,7 +181,7 @@ function formatarData(data) {
     }
 }
 
-// Definir data padrão (últimos 6 meses)
+// Definir data padrão (últimos 30 dias)
 function setDefaultDates() {
     const hoje = new Date();
     // Define o período padrão para os últimos 6 meses (aprox. 180 dias)
@@ -194,3 +193,4 @@ function setDefaultDates() {
 
 // Inicializar com datas padrão
 setDefaultDates();
+
