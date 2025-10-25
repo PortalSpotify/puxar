@@ -3,7 +3,7 @@ const API_BASE_URL = 'https://api.cnpja.com/office';
 const API_KEY = 'e3eba6c7-ceee-42b8-99b9-2565102a6bc3-44d3856b-603a-4d0c-9a28-a57dbfd43724';
 
 // Elementos do DOM
-const searchForm = document.getElementById('searchForm');
+const searchForm = document.getElementById('searchForm' );
 const dataInicio = document.getElementById('dataInicio');
 const dataFim = document.getElementById('dataFim');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -79,9 +79,9 @@ async function handleSearch(e) {
         apiResponseSpan.textContent = JSON.stringify(data, null, 2).substring(0, 500) + '...'; // Limita o tamanho do log
 
         // Processar resultados
-        // A API CNPJjá retorna o array de resultados na chave 'records'
+        // CORREÇÃO: A API CNPJjá retorna o array de resultados na chave 'records'
         if (data.records && data.records.length > 0) {
-            displayResults(data.records);
+            displayResults(data.records); // Usando data.records
         } else {
             showNoResults();
         }
@@ -94,45 +94,11 @@ async function handleSearch(e) {
     }
 }
 
-// Função auxiliar para buscar detalhes do CNPJ (incluindo email)
-async function fetchEmailDetails(cnpj) {
-    const url = `${API_BASE_URL.replace('/office', '/office/')}${cnpj}`;
-
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': API_KEY,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            // Se a consulta detalhada falhar (ex: CNPJ não encontrado ou erro de permissão), retorna N/A
-            return 'N/A';
-        }
-
-        const data = await response.json();
-        
-        // Tenta extrair o email dos campos mais prováveis na consulta detalhada
-        const email = data.email || data.company?.email || data.contact?.email || 'N/A';
-        return email;
-
-    } catch (error) {
-        console.error('Erro ao buscar detalhes do CNPJ:', cnpj, error);
-        return 'N/A';
-    }
-}
-
 // Função para exibir resultados
-async async function displayResults(results) {
+function displayResults(results) {
     // Limpar tabela
     tableBody.innerHTML = '';
-    
-    // Preparar para buscar emails em paralelo
-    const emailPromises = results.map(empresa => fetchEmailDetails(empresa.taxId));
-    const emails = await Promise.all(emailPromises);
-    
+
     // Adicionar linhas à tabela
     results.forEach((empresa, index) => {
         const row = document.createElement('tr');
@@ -140,7 +106,7 @@ async async function displayResults(results) {
         // Extrair dados
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
-        const email = emails[index]; // Usa o email obtido na consulta detalhada
+        const email = empresa.company?.email || empresa.email || 'N/A';
         const dataAbertura = formatarData(empresa.founded);
         const status = empresa.status?.text || 'N/A';
         const statusClass = status === 'Ativa' ? 'status-active' : 'status-inactive';
@@ -157,7 +123,7 @@ async async function displayResults(results) {
     });
 
     // Atualizar contagem de resultados
-    resultCount.textContent = `${results.length} empresa(s) encontrada(s). Nota: ${results.length} créditos adicionais consumidos para buscar emails.`;
+    resultCount.textContent = `${results.length} empresa(s) encontrada(s)`;
 
     // Mostrar container de resultados
     resultsContainer.classList.remove('hidden');
@@ -165,19 +131,18 @@ async async function displayResults(results) {
     debugInfo.classList.add('hidden'); // Oculta a seção de debug após o sucesso
 }
 
-// ... (restante do código)
-
-
 // Função para exibir mensagem de nenhum resultado
 function showNoResults() {
     resultsContainer.classList.add('hidden');
     noResults.classList.remove('hidden');
+    debugInfo.classList.add('hidden');
 }
 
 // Função para exibir erro
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
+    debugInfo.classList.add('hidden');
 }
 
 // Função para limpar resultados
@@ -217,7 +182,7 @@ function formatarData(data) {
     }
 }
 
-// Definir data padrão (últimos 30 dias)
+// Definir data padrão (últimos 6 meses)
 function setDefaultDates() {
     const hoje = new Date();
     // Define o período padrão para os últimos 6 meses (aprox. 180 dias)
@@ -229,4 +194,3 @@ function setDefaultDates() {
 
 // Inicializar com datas padrão
 setDefaultDates();
-
